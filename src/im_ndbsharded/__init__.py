@@ -3,6 +3,8 @@ from im_util import logdebug
 from google.appengine.ext.key_range import KeyRange
 
 def ndbshardedpagemap(pagemapf=None, ndbquery=None, initialshards = 10, pagesize = 100, **taskkwargs):
+    ndbquery = ndbquery() if callable(ndbquery) else ndbquery
+    
     @task(**taskkwargs)
     def MapOverRange(keyrange, **kwargs):
         logdebug("Enter MapOverRange: %s" % keyrange)
