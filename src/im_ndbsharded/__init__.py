@@ -2,16 +2,16 @@ from im_task import task, RetryTaskException
 from im_util import logdebug
 from google.appengine.ext.key_range import KeyRange
 
-def ndbshardedpagemap(pagemapf=None, ndbquery=None, initialshards = 10, pagesize = 100, **taskkwargs):
-    ndbquery = ndbquery() if callable(ndbquery) else ndbquery
-    
+def ndbshardedpagemap(pagemapf=None, ndbquery=None, initialshards = 10, pagesize = 100, **taskkwargs):    
     @task(**taskkwargs)
     def MapOverRange(keyrange, **kwargs):
         logdebug("Enter MapOverRange: %s" % keyrange)
+        
+        realquery1 = ndbquery() if callable(ndbquery) else ndbquery
  
         _fixkeyend(keyrange, kind)
  
-        filteredquery = keyrange.filter_ndb_query(ndbquery)
+        filteredquery = keyrange.filter_ndb_query(realquery1)
          
         logdebug (filteredquery)
          
@@ -27,8 +27,10 @@ def ndbshardedpagemap(pagemapf=None, ndbquery=None, initialshards = 10, pagesize
             for kr in krlist:
                 MapOverRange(kr)
         logdebug("Leave MapOverRange: %s" % keyrange)
+
+    realquery2 = ndbquery() if callable(ndbquery) else ndbquery
  
-    kind = ndbquery.kind
+    kind = realquery2.kind
  
     krlist = KeyRange.compute_split_points(kind, initialshards)
     logdebug("first krlist: %s" % krlist)
